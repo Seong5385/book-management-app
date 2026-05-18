@@ -22,10 +22,10 @@ public class BookService {
 
     public void registerBook(BookRegisterRequest request) {
         bookRepository.save(Book.builder()
-                        .title(request.getTitle())
-                        .author(request.getAuthor())
-                        .price(request.getPrice())
-                        .build());
+                .title(request.getTitle())
+                .author(request.getAuthor())
+                .price(request.getPrice())
+                .build());
     }
 
     public BookInfoResponse findByBookId(Long BookId) {
@@ -35,6 +35,7 @@ public class BookService {
                 .title(book.getTitle())
                 .author(book.getAuthor())
                 .price(book.getPrice())
+                .available(book.getAvailable()) // 💡 국경선 돌파: 대여 상태값 드디어 프론트로 전송!
                 .build();
     }
 
@@ -44,22 +45,26 @@ public class BookService {
 
     public List<BookInfoResponse> findAllBooks() {
         return bookRepository.findAll().stream().map(book -> BookInfoResponse.builder()
-                .id(book.getId())
-                .title(book.getTitle())
-                .author(book.getAuthor())
-                .price(book.getPrice())
-                .build())
+                        .id(book.getId())
+                        .title(book.getTitle())
+                        .author(book.getAuthor())
+                        .price(book.getPrice())
+                        .available(book.getAvailable()) // 💡 목록 조회에서도 상태값 전송!
+                        .build())
                 .collect(Collectors.toList());
     }
 
     public void updateBook(Long id, BookUpdateRequest request) {
         Book book = bookRepository.findById(id).orElseThrow(() -> new BookManagerException(ErrorCode.B0OK_NOT_FOUND));
-        book.updateBookInfo(
-                request.getTitle(),
-                request.getAuthor(),
-                request.getPrice()
-        );
 
+        // 💡 안전장치: 프론트가 대여버튼만 눌러서 다른 필드가 null로 오면, 기존 DB 값을 지키도록 방어!
+        String newTitle = (request.getTitle() != null && !request.getTitle().isBlank()) ? request.getTitle() : book.getTitle();
+        String newAuthor = (request.getAuthor() != null && !request.getAuthor().isBlank()) ? request.getAuthor() : book.getAuthor();
+        Integer newPrice = (request.getPrice() != null && request.getPrice() > 0) ? request.getPrice() : book.getPrice();
+
+        book.updateBookInfo(newTitle, newAuthor, newPrice);
         book.updateAvailable(request.isAvailable());
+
+        bookRepository.save(book);
     }
 }

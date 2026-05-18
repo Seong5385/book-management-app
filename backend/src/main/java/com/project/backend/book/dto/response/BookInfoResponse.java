@@ -13,4 +13,5 @@ public class BookInfoResponse {
     private String title;
     private String author;
     private Integer price;
+    private Boolean available;
 }
