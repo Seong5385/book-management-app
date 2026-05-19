@@ -12,7 +12,7 @@ phases:
     commands:
       - cd ..
       - mkdir -p deploy-backend
-      - cp backend/build/libs/note-app.jar deploy-backend/
+      - cp backend/build/libs/bookManager-app.jar deploy-backend/
       - cp backend/Procfile deploy-backend/
       - '[ -d backend/.ebextensions ] && cp -r backend/.ebextensions deploy-backend/ || true'
       - ls -la deploy-backend/
