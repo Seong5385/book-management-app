@@ -1,14 +1,14 @@
 version: 1
 applications:
-  - appRoot: frontend
-    frontend:
+  - frontend:
       phases:
         preBuild:
           commands:
-            - node -v
-            - npm ci
+            # 1. 의존성 설치 시 devDependencies(테일윈드 v4 등)까지 100% 다 포함해서 설치하도록 강제합니다.
+            - npm ci --include=dev --cache .npm --prefer-offline
         build:
           commands:
+            # 2. 패키지가 온전히 갖춰진 상태에서 Next.js Turbopack 프로덕션 빌드를 돌립니다.
             - npm run build
       artifacts:
         baseDirectory: .next
@@ -17,4 +17,5 @@ applications:
       cache:
         paths:
           - .next/cache/**/*
-          - node_modules/**/*
+          - .npm/**/*
+    appRoot: frontend
