@@ -2,7 +2,7 @@ version: 0.2
 
 env:
   variables:
-    NEXT_PUBLIC_API_URL: "https://noteapp-backend.kro.kr/"
+    NEXT_PUBLIC_API_URL: "https://bookmanager-api.r-e.kr/"
 phases:
   install:
     runtime-versions:
