@@ -41,5 +41,5 @@ tasks.named('test') {
 }
 
 bootJar {
-    archiveFileName = 'note-app.jar'
+    archiveFileName = 'bookManager-app.jar'
 }
