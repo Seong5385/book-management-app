@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import Link from "next/link"; // 💡 register 페이지 이동을 위해 추가
+import Link from "next/link";
 import { Book, BookRequest } from "@/types/book";
 import { bookApi } from "@/lib/api";
 
@@ -13,10 +13,9 @@ export default function BookListClient({ initialBooks }: BookListClientProps) {
     const [books, setBooks] = useState<Book[]>(initialBooks);
     const [loading, setLoading] = useState(false);
     const [successMsg, setSuccessMsg] = useState<string | null>(null);
-    const [showEditForm, setShowEditForm] = useState(false); // 💡 등록 폼 대신 '수정 폼' 여부로 명칭 변경
+    const [showEditForm, setShowEditForm] = useState(false);
     const [editBook, setEditBook] = useState<Book | null>(null);
 
-    // 수정용 입력 폼 전용 로컬 상태
     const [title, setTitle] = useState("");
     const [author, setAuthor] = useState("");
     const [price, setPrice] = useState<number | "">("");
@@ -35,7 +34,6 @@ export default function BookListClient({ initialBooks }: BookListClientProps) {
         }
     }, []);
 
-    // [수정] 버튼 클릭 시 입력 폼에 기존 정보 채우기
     useEffect(() => {
         if (editBook) {
             setTitle(editBook.title);
@@ -50,7 +48,6 @@ export default function BookListClient({ initialBooks }: BookListClientProps) {
         setTimeout(() => setSuccessMsg(null), 3000);
     };
 
-    // 도서 정보 수정 제출 핸들러
     const handleUpdateSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         if (!editBook) return;
@@ -85,14 +82,12 @@ export default function BookListClient({ initialBooks }: BookListClientProps) {
 
     return (
         <div className="min-h-screen bg-gray-50 text-gray-800 antialiased">
-            {/* 상단 네비게이션 바 */}
             <header className="sticky top-0 z-50 border-b border-gray-200 bg-white/80 backdrop-blur-md">
                 <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-4 sm:px-6">
                     <div className="flex items-center space-x-3">
                         <span className="text-2xl">📚</span>
                         <h1 className="text-xl font-bold tracking-tight text-gray-900 sm:text-2xl">Book Management</h1>
                     </div>
-                    {/* 💡 버튼을 클릭하면 링크를 타고 /register 주소로 이동합니다 */}
                     <Link
                         href="/register"
                         className="inline-flex items-center gap-2 rounded-xl bg-blue-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-blue-700 transition-all active:scale-98"
@@ -110,7 +105,6 @@ export default function BookListClient({ initialBooks }: BookListClientProps) {
                 )}
 
                 <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
-                    {/* 도서 목록 구역 */}
                     <div className={showEditForm ? "lg:col-span-2 space-y-4" : "lg:col-span-3 space-y-4"}>
                         <div className="flex items-center justify-between border-b border-gray-100 pb-4">
                             <h2 className="text-lg font-bold text-gray-900">
@@ -135,10 +129,14 @@ export default function BookListClient({ initialBooks }: BookListClientProps) {
                                     <div key={book.id} className="group relative flex flex-col justify-between rounded-2xl border border-gray-100 bg-white p-5 shadow-sm hover:shadow-md transition-all">
                                         <div>
                                             <div className="flex items-start justify-between gap-2">
-                                                <h3 className="font-bold text-gray-900 group-hover:text-blue-600 line-clamp-1">{book.title}</h3>
+                                                <Link href={`/books/${book.id}`} className="flex-1 group">
+                                                    <h3 className="font-bold text-gray-900 group-hover:text-blue-600 transition-colors line-clamp-1 cursor-pointer">
+                                                        {book.title}
+                                                    </h3>
+                                                </Link>
                                                 <span className={`inline-flex shrink-0 items-center rounded-full px-2 py-0.5 text-xs font-semibold ${book.available ? "bg-emerald-50 text-emerald-700" : "bg-gray-100 text-gray-600"}`}>
-                          {!book.available ? "대여 중" : "대여 가능"}
-                        </span>
+                                                    {!book.available ? "대여 중" : "대여 가능"}
+                                                </span>
                                             </div>
                                             <p className="mt-1 text-sm text-gray-500">✍️ {book.author}</p>
                                         </div>
@@ -160,7 +158,6 @@ export default function BookListClient({ initialBooks }: BookListClientProps) {
                         )}
                     </div>
 
-                    {/* 오직 [수정]할 때만 열리는 우측 사이드 뷰 구역 */}
                     {showEditForm && editBook && (
                         <div className="lg:col-span-1">
                             <div className="sticky top-24 rounded-2xl border border-gray-100 bg-white p-6 shadow-sm">
@@ -172,21 +169,15 @@ export default function BookListClient({ initialBooks }: BookListClientProps) {
                                 <form onSubmit={handleUpdateSubmit} className="space-y-4">
                                     <div>
                                         <label className="block text-xs font-semibold text-gray-500 mb-1">도서 제목</label>
-                                        <input type="text" value={title} onChange={(e) => setTitle(e.target.value)} className="w-full rounded-xl border border-gray-200 px-4 py-2.5 text-sm" />
+                                        <input type="text" value={title} onChange={(e) => setTitle(e.target.value)} className="w-full rounded-xl border border-gray-200 px-4 py-2.5 text-sm text-gray-900 bg-white" />
                                     </div>
                                     <div>
                                         <label className="block text-xs font-semibold text-gray-500 mb-1">저자 이름</label>
-                                        <input type="text" value={author} onChange={(e) => setAuthor(e.target.value)} className="w-full rounded-xl border border-gray-200 px-4 py-2.5 text-sm" />
+                                        <input type="text" value={author} onChange={(e) => setAuthor(e.target.value)} className="w-full rounded-xl border border-gray-200 px-4 py-2.5 text-sm text-gray-900 bg-white" />
                                     </div>
                                     <div>
                                         <label className="block text-xs font-semibold text-gray-500 mb-1">가격 (원)</label>
-                                        <input type="number" value={price} onChange={(e) => setPrice(e.target.value === "" ? "" : Number(e.target.value))} className="w-full rounded-xl border border-gray-200 px-4 py-2.5 text-sm" />
-                                    </div>
-                                    <div className="flex items-center justify-between rounded-xl border border-gray-100 bg-gray-50/50 p-3">
-                                        <span className="text-sm font-medium text-gray-600">대여 가능 여부</span>
-                                        <button type="button" onClick={() => setAvailable(!available)} className={`relative inline-flex h-6 w-11 rounded-full ${available ? "bg-blue-600" : "bg-gray-200"}`}>
-                                            <span className={`inline-block h-5 w-5 transform rounded-full bg-white transition ${available ? "translate-x-5" : "translate-x-0"}`} />
-                                        </button>
+                                        <input type="number" value={price} onChange={(e) => setPrice(e.target.value === "" ? "" : Number(e.target.value))} className="w-full rounded-xl border border-gray-200 px-4 py-2.5 text-sm text-gray-900 bg-white" />
                                     </div>
                                     <button type="submit" className="w-full rounded-xl bg-gray-900 py-3 text-sm font-semibold text-white">수정 완료하기</button>
                                 </form>

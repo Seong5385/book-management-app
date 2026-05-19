@@ -1,45 +1,52 @@
-import {Book, BookRequest} from "@/types/book";
+const BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
 
-const BASE_URL = process.env.BASE_URL ?? 'http://localhost:8080'
-
-async function fetchApi<T>(path: string, options?: RequestInit): Promise<T> {
-    const url = `${BASE_URL}/${path}`;
-    const res = await fetch(url, {
-        headers: {
-            'Content-Type': 'application/json',
-            ...options?.headers,
-    },
-        ...options
-    })
-
-    if(!res.ok) {
-        const err = await res.json().catch(() => ({ message: `HTTP ${res.status}` }))
-        throw new Error((err as { message?: string }).message ?? `HTTP ${res.status}`);
-    }
-
-    if (res.status === 204) return null as T
-    return res.json() as Promise<T>
+export interface BookRequest {
+    title: string;
+    author: string;
+    price: number;
+    available: boolean;
 }
 
 export const bookApi = {
-    getAllBooks: (): Promise<Book[]> =>
-        fetchApi<Book[]>('api/books/'),
+    getAllBooks: async () => {
+        const response = await fetch(`${BASE_URL}/api/books/`, { cache: "no-store" });
+        return response.json();
+    },
 
-    getByBookId: (bookId: number): Promise<Book> =>
-        fetchApi<Book>(`api/books/${bookId}`),
+    getByBookId: async (id: number) => {
+        const response = await fetch(`${BASE_URL}/api/books/${id}`, { cache: "no-store" });
+        return response.json();
+    },
 
-    createBook: (data: BookRequest): Promise<Book> =>
-        fetchApi<Book>('api/books/', {
-            method: 'POST',
+    createBook: async (data: BookRequest) => {
+        const response = await fetch(`${BASE_URL}/api/books/`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
             body: JSON.stringify(data),
-        }),
+        });
+        return response.json();
+    },
 
-    deleteBook: (bookId: number):Promise<void> =>
-        fetchApi<void>(`api/books/${bookId}`, { method: 'DELETE' }),
-
-    updateBook: (bookId: number, data: BookRequest): Promise<void> =>
-        fetchApi<void>(`api/books/${bookId}`, {
-            method: 'PUT',
+    updateBook: async (id: number, data: BookRequest) => {
+        const response = await fetch(`${BASE_URL}/api/books/${id}`, {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
             body: JSON.stringify(data),
-        }),
-}
+        });
+        return response.json();
+    },
+
+    toggleBookAvailable: async (id: number) => {
+        const response = await fetch(`${BASE_URL}/api/books/${id}/toggle`, {
+            method: "PUT",
+        });
+        return response.json();
+    },
+
+    deleteBook: async (id: number) => {
+        const response = await fetch(`${BASE_URL}/api/books/${id}`, {
+            method: "DELETE",
+        });
+        return response.json();
+    }
+};
