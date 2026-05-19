@@ -1,0 +1,24 @@
+version: 0.2
+
+phases:
+  install:
+    runtime-versions:
+      java: corretto21
+
+  build:
+    commands:
+      - cd backend && chmod +x gradlew && ./gradlew bootJar -x test
+  post_build:
+    commands:
+      - cd ..
+      - mkdir -p deploy-backend
+      - cp backend/build/libs/note-app.jar deploy-backend/
+      - cp backend/Procfile deploy-backend/
+      - '[ -d backend/.ebextensions ] && cp -r backend/.ebextensions deploy-backend/ || true'
+      - ls -la deploy-backend/
+
+artifacts:
+  files:
+    - '**/*'
+  base-directory: deploy-backend
+  discard-paths: no
